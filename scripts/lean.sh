@@ -1,15 +1,12 @@
 #!/bin/bash
-
-#扎入风扇~
-wget -P ./target/linux/rockchip/armv8/base-files/etc/init.d/ https://github.com/friendlyarm/friendlywrt/raw/master-v19.07.1/target/linux/rockchip-rk3399/base-files/etc/init.d/fa-rk3399-pwmfan
-wget -P ./target/linux/rockchip/armv8/base-files/usr/bin/ https://github.com/friendlyarm/friendlywrt/raw/master-v19.07.1/target/linux/rockchip-rk3399/base-files/usr/bin/start-rk3399-pwm-fan.sh
-chmod 777 target/linux/rockchip/armv8/base-files/etc/init.d/fa-rk3399-pwmfan
-chmod 777 target/linux/rockchip/armv8/base-files/usr/bin/start-rk3399-pwm-fan.sh
-
-# Addd mosdns
-svn export https://github.com/QiuSimons/openwrt-mos/trunk/mosdns ./package/lean/mosdns
-svn export https://github.com/QiuSimons/openwrt-mos/trunk/luci-app-mosdns ./package/lean/luci-app-mosdns
-svn export https://github.com/QiuSimons/openwrt-mos/trunk/v2ray-geodata ./package/lean/v2ray-geodata
+#=================================================
+# File name: lean.sh
+# System Required: Linux
+# Version: 1.0
+# Lisence: MIT
+# Author: SuLingGG
+# Blog: https://mlapp.cn
+#=================================================
 
 # Add cpufreq
 rm -rf ./feeds/luci/applications/luci-app-cpufreq 
@@ -20,10 +17,18 @@ sed -i 's,2016,2208,g' feeds/luci/applications/luci-app-cpufreq/root/etc/uci-def
 sed -i 's,1512,1608,g' feeds/luci/applications/luci-app-cpufreq/root/etc/uci-defaults/10-cpufreq
 rm -rf ./target/linux/rockchip/armv8/base-files/etc/hotplug.d/usb
 
+# 🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧
+rm -rf ./target/linux/rockchip/armv8/base-files/etc/hotplug.d/usb
+rm -rf package/kernel/mac80211
+svn co https://github.com/immortalwrt/immortalwrt/branches/openwrt-18.06-k5.4/package/kernel/mac80211 package/kernel/mac80211
+rm -rf package/kernel/rtl8821cu
+svn co https://github.com/immortalwrt/immortalwrt/branches/openwrt-18.06-k5.4/package/kernel/rtl8821cu package/kernel/rtl8821cu
+rm -rf package/kernel/mwlwifi
+svn co https://github.com/immortalwrt/immortalwrt/branches/openwrt-18.06-k5.4/package/kernel/mwlwifi package/kernel/mwlwifi
+
 # Clone community packages to package/community
 mkdir package/community
 pushd package/community
-
 
 # Add luci-app-passwall
 git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall
@@ -35,7 +40,8 @@ rm -rf openwrt-package/verysync
 rm -rf openwrt-package/luci-app-verysync
 
 # Add luci-app-ssr-plus
-git clone --depth=1 https://github.com/fw876/helloworld
+# git clone --depth=1 https://github.com/fw876/helloworld
+git clone --depth=1 https://github.com/DHDAXCW/helloworld
 
 # Add luci-app-unblockneteasemusic
 rm -rf ../../customfeeds/luci/applications/luci-app-unblockmusic
@@ -62,9 +68,6 @@ svn co https://github.com/linkease/nas-packages/trunk/network/services/linkease
 
 # Add luci-app-onliner (need luci-app-nlbwmon)
 git clone --depth=1 https://github.com/rufengsuixing/luci-app-onliner
-
-# Add luci-app-oled (R2S Only)
-git clone --depth=1 https://github.com/NateLol/luci-app-oled
 
 # Add ServerChan
 git clone --depth=1 https://github.com/tty228/luci-app-serverchan
@@ -104,7 +107,7 @@ svn co https://github.com/zcy85611/Packages/trunk/udpspeeder
 git clone --depth=1 https://github.com/esirplayground/luci-app-poweroff
 
 # Add OpenAppFilter
-git clone --depth=1 https://github.com/destan19/OpenAppFilter
+git clone --depth=1 https://github.com/DHDAXCW/OpenAppFilter
 
 # Add luci-aliyundrive-webdav
 rm -rf ../../customfeeds/luci/applications/luci-app-aliyundrive-webdav 
@@ -132,30 +135,13 @@ pushd package/kernel/mt76
 sed -i '/mt7662u_rom_patch.bin/a\\techo mt76-usb disable_usb_sg=1 > $\(1\)\/etc\/modules.d\/mt76-usb' Makefile
 popd
 
-# Add po2lmo
-git clone --depth=1 https://github.com/openwrt-dev/po2lmo.git
-pushd po2lmo
-make && sudo make install
-popd
-
 # Change default shell to zsh
 sed -i 's/\/bin\/ash/\/usr\/bin\/zsh/g' package/base-files/files/etc/passwd
 # sed -i 's/5.15/5.10/g' target/linux/rockchip/Makefile
+
 # Modify default IP
 sed -i 's/192.168.1.1/192.168.11.1/g' package/base-files/files/bin/config_generate
-sed -i '/uci commit system/i\uci set system.@system[0].hostname='FusionWrt'' package/lean/default-settings/files/zzz-default-settings
-sed -i "s/OpenWrt /DHDAXCW @ FusionWrt /g" package/lean/default-settings/files/zzz-default-settings
-
-#pushd target/linux/rockchip/patches-5.15
-#cp -f $GITHUB_WORKSPACE/scripts/patch/994-wode.patch 994-wode.patch
-#popd
 
 # 删除定时coremark
 rm -rf ./customfeeds/packages/utils/coremark
 svn co https://github.com/DHDAXCW/packages/trunk/utils/coremark customfeeds/packages/utils/coremark
-
-# Custom configs
-# git am $GITHUB_WORKSPACE/patches/lean/*.patch
-# git am $GITHUB_WORKSPACE/patches/*.patch
-
-echo -e " DHDAXCW's FusionWrt built on "$(date +%Y.%m.%d)"\n -----------------------------------------------------" >> package/base-files/files/etc/banner
